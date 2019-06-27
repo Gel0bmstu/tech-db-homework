@@ -1,6 +1,8 @@
 package database
 
 import (
+	"fmt"
+
 	"github.com/jackc/pgx"
 )
 
@@ -71,7 +73,7 @@ func ResetDB() (err error) {
 		CREATE UNLOGGED TABLE "user_forum" (
 			"nickname" citext COLLATE ucs_basic REFERENCES users(nickname),
 			"forum" citext REFERENCES forums(slug),
-			CONSTRAINT forum_to_users_const UNIQUE ("nickname", "forum")
+			CONSTRAINT user_forum_const UNIQUE ("nickname", "forum")
 		) WITH (autovacuum_enabled=false);
 
 		-- ---------------------------------------------------------------------
@@ -101,7 +103,7 @@ func ResetDB() (err error) {
 			ON posts (id);
 
 		CREATE INDEX IF NOT EXISTS idxPostPath 
-			ON posts (path, (path[1]));
+			ON posts ((path[1]), path);
 
 		CREATE INDEX IF NOT EXISTS idxPostThreadIdPath
 			ON posts (thread, id, path);
@@ -111,8 +113,8 @@ func ResetDB() (err error) {
 
 		-- sdfasdfs
 
-		CREATE INDEX IF NOT EXISTS idxPostAuthorForum
-			ON posts (author, forum);
+		CREATE INDEX IF NOT EXISTS idxPostThreadParentId
+			ON posts (path[1], id, parent)
 
 		CREATE INDEX IF NOT EXISTS idxThreadAuthorForum
 			ON threads (author, forum);
@@ -262,8 +264,8 @@ func ResetDB() (err error) {
 	// ON threads
 	// FOR EACH ROW EXECUTE PROCEDURE userForumInsert();
 
-	// fmt.Println(sql)
-	_, err = DB.Exec(sql)
+	fmt.Println(sql)
+	// _, err = DB.Exec(sql)
 
 	return
 }

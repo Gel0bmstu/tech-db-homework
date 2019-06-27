@@ -158,7 +158,6 @@ func (instance *Posts) CreatePost(soi string) (err error) {
 
 	if err != nil {
 		fmt.Println("VOT TEBE!")
-		fmt.Println(userForumInsertValues)
 		transactionUserFroum.Rollback()
 		return
 	}

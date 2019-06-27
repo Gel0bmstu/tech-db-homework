@@ -26,13 +26,13 @@ var (
 	// Flat sort
 	GetPostsByIdFlatSinceDesc = `SELECT id, author, message, thread, created, parent
 								 FROM posts
-								 WHERE thread = $1 AND id < $2
+								 WHERE thread = $1 AND id < $2::TEXT::INTEGER
 								 ORDER BY id DESC
 								 LIMIT $3::TEXT::INTEGER;`
 
 	GetPostsByIdFlatSince = `SELECT id, author, message, thread, created, parent
 							 FROM posts
-							 WHERE thread = $1 AND id > $2
+							 WHERE thread = $1 AND id > $2::TEXT::INTEGER
 							 ORDER BY id
 							 LIMIT $3::TEXT::INTEGER;`
 
@@ -55,7 +55,7 @@ var (
 								 	(
 									 SELECT path
 									 FROM posts 
-									 WHERE id = $2
+									 WHERE id = $2::TEXT::INTEGER
 									) 
 								 ORDER BY path DESC 
 								 LIMIT $3::TEXT::INTEGER;`
@@ -67,7 +67,7 @@ var (
 							 	(
 								 SELECT path
 								 FROM posts 
-								 WHERE id = $2
+								 WHERE id = $2::TEXT::INTEGER
 								) 
 							 ORDER BY path 
 							 LIMIT $3::TEXT::INTEGER;`
@@ -85,12 +85,12 @@ var (
 						LIMIT $2::TEXT::INTEGER;`
 
 	// ParentTree sort
-	GetPostsByIdParentTreeSinceDesc = `SELECT id, author, message, thread, created, parent 
-									   FROM posts 
+	GetPostsByIdParentTreeSinceDesc = `SELECT p.id, p.author, p.message, p.thread, p.created, p.parent 
+									   FROM posts p
 									   JOIN (
-										   SELECT id AS rootParentsId 
+										   SELECT id 
 										   FROM posts 
-										   WHERE thread = $1 AND parent = 0 AND path[1] < (
+										   WHERE thread = $1 AND parent = 0 AND id < (
 											   SELECT path[1] 
 											   FROM posts 
 											   WHERE id = $2)  
@@ -98,47 +98,48 @@ var (
 										   LIMIT $3::TEXT::INTEGER) 
 									   AS rootParents 
 									   ON (
-										   thread = $1 AND rootParents.rootParentsId = path[1])
-									   ORDER BY rootParents.rootParentsId DESC, path;`
+										   rootParents.id = p.path[1])
+									   ORDER BY path[1] DESC, path;`
 
-	GetPostsByIdParentTreeSince = `SELECT id, author, message, thread, created, parent 
-									   FROM posts 
-									   JOIN (
-										   SELECT id AS rootParentsId 
+	GetPostsByIdParentTreeSince = `SELECT p.id, p.author, p.message, p.thread, p.created, p.parent 
+								   FROM posts p
+								   JOIN (
+									   SELECT id
+									   FROM posts
+									   WHERE thread = $1 AND parent = 0 AND id > (
+										   SELECT path[1] 
 										   FROM posts 
-										   WHERE thread = $1 AND parent = 0 AND path[1] > (
-											   SELECT path[1] 
-											   FROM posts 
-											   WHEre id = $2)  
-										   ORDER BY id DESC 
-										   LIMIT $3::TEXT::INTEGER) 
-									   AS rootParents 
-									   ON (
-										   thread = $1 AND rootParents.rootParentsId = path[1])
-									   ORDER BY rootParents.rootParentsId, path;`
+										   WHEre id = $2)  
+									   ORDER BY id 
+									   LIMIT $3::TEXT::INTEGER) 
+								   AS rootParents 
+								   ON (
+									   rootParents.id = p.path[1])
+								   ORDER BY path[1], path;`
 
-	GetPostsByIdParentTreeDesc = `SELECT id, author, message, thread, created, parent 
-								  FROM posts 
+	GetPostsByIdParentTreeDesc = `SELECT p.id, p.author, p.message, p.thread, p.created, p.parent 
+								  FROM posts p
 								  JOIN (
 									  SELECT id AS rootParentsId 
 									  FROM posts 
 									  WHERE thread = $1 AND parent = 0
-									  ORDER BY id DESC LIMIT $2::TEXT::INTEGER)
+									  ORDER BY id DESC 
+									  LIMIT $2::TEXT::INTEGER)
 								  AS rootParents 
 								  ON (
-									  thread = $1 AND rootParents.rootParentsId = path[1])
-								  ORDER BY rootParents.rootParentsId DESC, path;`
+									  rootParents.rootParentsId = p.path[1])
+								  ORDER BY path[1] DESC, path;`
 
-	GetPostsByIdParentTree = `SELECT id, author, message, thread, created, parent 
-									FROM posts pst
-									JOIN (
-										SELECT id as rootParentsId
-										FROM posts 
-										WHERE thread = $1 AND parent = 0
-										ORDER BY id
-										LIMIT $2::TEXT::INTEGER) 
-									AS rootParents 
-									ON (
-										thread = $1 AND rootParents.rootParentsId = path[1]) 
-									ORDER BY path;`
+	GetPostsByIdParentTree = `SELECT p.id, p.author, p.message, p.thread, p.created, p.parent 
+							  FROM posts p
+							  JOIN (
+								  SELECT id as rootParentsId
+								  FROM posts 
+								  WHERE thread = $1 AND parent = 0
+								  ORDER BY id
+								  LIMIT $2::TEXT::INTEGER) 
+							  AS rootParents 
+							  ON (
+								  rootParents.rootParentsId = p.path[1]) 
+							  ORDER BY path[1], path;`
 )

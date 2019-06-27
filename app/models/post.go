@@ -24,8 +24,6 @@ type Post struct {
 	Path     []string
 }
 
-var timestamp = "2006-01-02T18:04:05.01+03:00"
-
 type Posts []Post
 
 func (instance *Posts) CreatePost(soi string) (err error) {
@@ -86,7 +84,7 @@ func (instance *Posts) CreatePost(soi string) (err error) {
 
 		(*instance)[i].Forum = &forumSlug
 		(*instance)[i].Thread = &threadID
-		(*instance)[i].Created = &timestamp
+		(*instance)[i].Created = &database.Timestamp
 		if (*instance)[i].Author != "" {
 			err = database.DB.QueryRow(
 				slc.CheckUserNicknameByNickname,
@@ -179,7 +177,7 @@ func (instance *Posts) CreatePost(soi string) (err error) {
 		rows.Scan(
 			&(*instance)[postCount].Id,
 		)
-		(*instance)[postCount].Created = &timestamp
+		(*instance)[postCount].Created = &database.Timestamp
 		postCount++
 	}
 
@@ -204,7 +202,7 @@ func (instance *Posts) CreatePost(soi string) (err error) {
 	return
 }
 
-func (instance *Posts) GetPosts(soi string, uv UrlVars) (posts *[]*Post, err error) {
+func (instance *Posts) GetPosts(soi string, uv UrlVars) (err error) {
 	var (
 		threadID  int32
 		forumSlug string
@@ -235,7 +233,7 @@ func (instance *Posts) GetPosts(soi string, uv UrlVars) (posts *[]*Post, err err
 	}
 
 	if err != nil {
-		return nil, ThreadNotFoundError
+		return ThreadNotFoundError
 	}
 
 	switch uv.Sort {
@@ -248,17 +246,15 @@ func (instance *Posts) GetPosts(soi string, uv UrlVars) (posts *[]*Post, err err
 	}
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	var ps []*Post
-	// defer rows.Close()
 	for rows.Next() {
 		var p Post
 
 		p.Forum = &forumSlug
 		p.Thread = &threadID
-		p.Created = &timestamp
+		p.Created = &database.Timestamp
 
 		err = rows.Scan(
 			&p.Id,
@@ -268,13 +264,13 @@ func (instance *Posts) GetPosts(soi string, uv UrlVars) (posts *[]*Post, err err
 		)
 
 		if err != nil {
-			return nil, err
+			return err
 		}
 
-		ps = append(ps, &p)
+		*instance = append(*instance, p)
 	}
 
-	return &ps, err
+	return
 }
 
 func GetPostsByFlatSort(uv UrlVars, threadID int32) (rows *pgx.Rows, err error) {
@@ -418,7 +414,7 @@ func (instance *Post) GetPostDetails(id string, r string) (data map[string]inter
 		&instance.IsEdited,
 	)
 
-	instance.Created = &timestamp
+	instance.Created = &database.Timestamp
 
 	if err != nil {
 		return nil, PostNotFoundError
@@ -542,7 +538,7 @@ func (instance *Post) PostUpdate(id string) (err error) {
 		)
 	}
 
-	instance.Created = &timestamp
+	instance.Created = &database.Timestamp
 
 	return
 }

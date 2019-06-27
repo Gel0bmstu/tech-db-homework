@@ -43,8 +43,6 @@ func SetRoutes(instance *gin.Engine) {
 
 func Initialize() (r *gin.Engine) {
 
-	gin.SetMode(gin.DebugMode)
-
 	r = gin.Default()
 
 	SetRoutes(r)

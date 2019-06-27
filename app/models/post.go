@@ -147,7 +147,7 @@ func (instance *Posts) CreatePost(soi string) (err error) {
 		}
 	}
 
-	queryPosts += ` RETURNING created, id;`
+	queryPosts += ` RETURNING id;`
 	queryUserForum += ` ON CONFLICT DO NOTHING;`
 
 	// Заполняем вспомогательную таблицу юзеров
@@ -179,9 +179,9 @@ func (instance *Posts) CreatePost(soi string) (err error) {
 	postCount = 0
 	for rows.Next() {
 		rows.Scan(
-			&(*instance)[postCount].Created,
 			&(*instance)[postCount].Id,
 		)
+		(*instance)[postCount].Created = &timestamp
 		postCount++
 	}
 
@@ -255,6 +255,7 @@ func (instance *Posts) GetPosts(soi string, uv UrlVars) (posts *[]*Post, err err
 	if err != nil {
 		return nil, err
 	}
+
 	var ps []*Post
 	start = time.Now()
 	for rows.Next() {

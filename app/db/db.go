@@ -1,8 +1,6 @@
 package database
 
 import (
-	"fmt"
-
 	"github.com/jackc/pgx"
 )
 
@@ -218,8 +216,8 @@ func ResetDB() (err error) {
 			ON posts
 			FOR EACH ROW EXECUTE PROCEDURE changePath();
 	`
-	fmt.Println(sql)
-	// _, err = DB.Exec(sql)
+	// fmt.Println(sql)
+	_, err = DB.Exec(sql)
 
 	return
 }

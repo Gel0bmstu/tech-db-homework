@@ -110,11 +110,6 @@ func ResetDB() (err error) {
 		CREATE INDEX IF NOT EXISTS idxPostThreadPath
 			ON posts (thread, path);
 
-<<<<<<< HEAD
-=======
-		-- sdfasdfs
-
->>>>>>> b318dd26b27c65aa2b2545eb297072764bb5f7fc
 		-- ---------------------------------------------------------------------
 		-- HELP FUNCTIONS:
 

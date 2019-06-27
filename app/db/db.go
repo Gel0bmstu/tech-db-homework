@@ -112,15 +112,6 @@ func ResetDB() (err error) {
 		CREATE INDEX IF NOT EXISTS idxPostThreadPath
 			ON posts (thread, path);
 
-		CREATE INDEX IF NOT EXISTS idxPostThreadPathParent 
-			ON posts (thread, path, id);
-			
-		CREATE INDEX IF NOT EXISTS idxPostId 
-			ON posts (id);
-
-		-- try
-
-
 		-- ---------------------------------------------------------------------
 		-- HELP FUNCTIONS:
 

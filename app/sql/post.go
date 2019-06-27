@@ -88,13 +88,13 @@ var (
 	GetPostsByIdParentTreeSinceDesc = `SELECT p.id, p.author, p.message, p.parent 
 									   FROM posts p
 									   JOIN (
-										   SELECT p1.id 
-										   FROM posts p1
-										   WHERE p1.parent = 0 AND p1.thread = $1 AND p1.id < (
-											   SELECT p2.path[1] 
-											   FROM posts p2 
-											   WHERE p2.id = $2)  
-										   ORDER BY p1.path DESC 
+										   SELECT id 
+										   FROM posts 
+										   WHERE parent = 0 AND thread = $1 AND id < (
+											   SELECT path[1]
+											   FROM posts
+											   WHERE id = $2)  
+										   ORDER BY id DESC 
 										   LIMIT $3::TEXT::INTEGER) 
 									   AS rootParents 
 									   ON (
@@ -104,12 +104,12 @@ var (
 	GetPostsByIdParentTreeSince = `SELECT p.id, p.author, p.message, p.parent 
 								   FROM posts p
 								   JOIN (
-									   SELECT p1.id
-									   FROM posts p1
-									   WHERE p1.parent = 0 AND p1.thread = $1 AND p1.id > (
-										   SELECT p2.path[1] 
-										   FROM posts p2
-										   WHERE p2.id = $2)  
+									   SELECT id
+									   FROM posts
+									   WHERE parent = 0 AND thread = $1 AND id > (
+										   SELECT path[1] 
+										   FROM posts
+										   WHERE id = $2)  
 									   ORDER BY id 
 									   LIMIT $3::TEXT::INTEGER) 
 								   AS rootParents 

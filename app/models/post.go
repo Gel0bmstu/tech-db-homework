@@ -2,9 +2,7 @@ package models
 
 import (
 	"fmt"
-	"log"
 	"strings"
-	"time"
 
 	"github.com/jackc/pgx"
 
@@ -240,7 +238,6 @@ func (instance *Posts) GetPosts(soi string, uv UrlVars) (posts *[]*Post, err err
 		return nil, ThreadNotFoundError
 	}
 
-	start := time.Now()
 	switch uv.Sort {
 	case "flat", "":
 		rows, err = GetPostsByFlatSort(uv, threadID)
@@ -248,8 +245,6 @@ func (instance *Posts) GetPosts(soi string, uv UrlVars) (posts *[]*Post, err err
 		rows, err = GetPostsByTreeSort(uv, threadID)
 	case "parent_tree":
 		rows, err = GetPostsByParentTreeSort(uv, threadID)
-		elapsed := time.Since(start)
-		log.Printf("\n\nSQL: %s\n\n", elapsed)
 	}
 
 	if err != nil {
@@ -257,9 +252,8 @@ func (instance *Posts) GetPosts(soi string, uv UrlVars) (posts *[]*Post, err err
 	}
 
 	var ps []*Post
-	start = time.Now()
+	// defer rows.Close()
 	for rows.Next() {
-		defer rows.Close()
 		var p Post
 
 		p.Forum = &forumSlug
@@ -278,11 +272,7 @@ func (instance *Posts) GetPosts(soi string, uv UrlVars) (posts *[]*Post, err err
 		}
 
 		ps = append(ps, &p)
-
 	}
-
-	elapsed := time.Since(start)
-	log.Printf("\n\nSCAN: %s\n\n", elapsed)
 
 	return &ps, err
 }

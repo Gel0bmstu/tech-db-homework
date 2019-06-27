@@ -50,10 +50,7 @@ func ThreadsSlugOrIdPosts(c *gin.Context) {
 
 	posts, err := p.GetPosts(slugOrID, uv)
 
-	// if *posts == nil {
-	// 	votar := []*models.Post{}
-	// 	posts = &votar
-	// }
+	// res, _ := json.Marshal(posts)
 
 	switch err {
 	case nil:

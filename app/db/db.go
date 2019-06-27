@@ -27,7 +27,7 @@ func ResetDB() (err error) {
 			"fullname" text NOT NULL,
 			"about" text,
 			"email" citext UNIQUE
-		) WITH (autovacuum_enabled=false);
+		);
 
 		CREATE UNLOGGED TABLE "forums"(
 			"id" BIGSERIAL PRIMARY KEY,
@@ -36,8 +36,7 @@ func ResetDB() (err error) {
 			"slug" citext NOT NULL UNIQUE,
 			"threads" integer DEFAULT 0,
 			"title" text
-		) WITH (autovacuum_enabled=false);
-
+		);
 		CREATE UNLOGGED TABLE "threads"(
 			"id" BIGSERIAL PRIMARY KEY,
 			"author" citext REFERENCES users(nickname),
@@ -47,7 +46,7 @@ func ResetDB() (err error) {
 			"slug" citext UNIQUE,
 			"title" text,
 			"votes" integer DEFAULT 0 NOT NULL
-		) WITH (autovacuum_enabled=false);
+		);
 
 		CREATE UNLOGGED TABLE "posts" (
 			"id" BIGSERIAL,
@@ -57,9 +56,9 @@ func ResetDB() (err error) {
 			"isedited" boolean DEFAULT 'false',
 			"forum" citext REFERENCES forums(slug),
 			"thread" bigint REFERENCES threads(id),
-			"created" timestamp WITH TIME ZONE DEFAULT '1970-01-01T00:00:00.000Z',
+			-- "created" timestamp WITH TIME ZONE DEFAULT '1970-01-01T00:00:00.000Z',
 			"path" bigint[]
-		) WITH (autovacuum_enabled=false);
+		);
 
 		CREATE UNLOGGED TABLE "votes" (
 			"id" BIGSERIAL PRIMARY KEY,
@@ -67,13 +66,13 @@ func ResetDB() (err error) {
 			"nickname" citext NOT NULL REFERENCES users(nickname),
 			"thread" bigint REFERENCES threads(id),
 			"voice" int2 
-		) WITH (autovacuum_enabled=false);
+		);
 
 		CREATE UNLOGGED TABLE "user_forum" (
 			"nickname" citext COLLATE ucs_basic REFERENCES users(nickname),
 			"forum" citext REFERENCES forums(slug),
 			CONSTRAINT user_forum_const UNIQUE ("nickname", "forum")
-		) WITH (autovacuum_enabled=false);
+		);
 
 		-- ---------------------------------------------------------------------
 		-- INDEXES:

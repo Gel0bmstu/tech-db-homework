@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -14,16 +15,18 @@ import (
 )
 
 type Post struct {
-	Id       int64      `json:"id"`
-	Parent   int64      `json:"parent"`
-	Author   string     `json:"author"`
-	Message  string     `json:"message"`
-	IsEdited bool       `json:"isEdited"`
-	Forum    *string    `json:"forum"`
-	Thread   *int32     `json:"thread"`
-	Created  *time.Time `json:"created"`
+	Id       int64   `json:"id"`
+	Parent   int64   `json:"parent"`
+	Author   string  `json:"author"`
+	Message  string  `json:"message"`
+	IsEdited bool    `json:"isEdited"`
+	Forum    *string `json:"forum"`
+	Thread   *int32  `json:"thread"`
+	Created  *string `json:"created"`
 	Path     []string
 }
+
+var timestamp = "2006-01-02T18:04:05.01+03:00"
 
 type Posts []Post
 
@@ -85,7 +88,7 @@ func (instance *Posts) CreatePost(soi string) (err error) {
 
 		(*instance)[i].Forum = &forumSlug
 		(*instance)[i].Thread = &threadID
-
+		(*instance)[i].Created = &timestamp
 		if (*instance)[i].Author != "" {
 			err = database.DB.QueryRow(
 				slc.CheckUserNicknameByNickname,
@@ -203,7 +206,7 @@ func (instance *Posts) CreatePost(soi string) (err error) {
 	return
 }
 
-func (instance *Posts) GetPosts(soi string, uv UrlVars) (err error) {
+func (instance *Posts) GetPosts(soi string, uv UrlVars) (posts *[]*Post, err error) {
 	var (
 		threadID  int32
 		forumSlug string
@@ -234,9 +237,10 @@ func (instance *Posts) GetPosts(soi string, uv UrlVars) (err error) {
 	}
 
 	if err != nil {
-		return ThreadNotFoundError
+		return nil, ThreadNotFoundError
 	}
 
+	start := time.Now()
 	switch uv.Sort {
 	case "flat", "":
 		rows, err = GetPostsByFlatSort(uv, threadID)
@@ -244,36 +248,42 @@ func (instance *Posts) GetPosts(soi string, uv UrlVars) (err error) {
 		rows, err = GetPostsByTreeSort(uv, threadID)
 	case "parent_tree":
 		rows, err = GetPostsByParentTreeSort(uv, threadID)
+		elapsed := time.Since(start)
+		log.Printf("\n\nSQL: %s\n\n", elapsed)
 	}
 
 	if err != nil {
-		return err
+		return nil, err
 	}
-
+	var ps []*Post
+	start = time.Now()
 	for rows.Next() {
-
+		defer rows.Close()
 		var p Post
 
 		p.Forum = &forumSlug
+		p.Thread = &threadID
+		p.Created = &timestamp
 
 		err = rows.Scan(
 			&p.Id,
 			&p.Author,
 			&p.Message,
-			&p.Thread,
-			&p.Created,
 			&p.Parent,
 		)
 
 		if err != nil {
-			return err
+			return nil, err
 		}
 
-		*instance = append(*instance, p)
+		ps = append(ps, &p)
 
 	}
 
-	return
+	elapsed := time.Since(start)
+	log.Printf("\n\nSCAN: %s\n\n", elapsed)
+
+	return &ps, err
 }
 
 func GetPostsByFlatSort(uv UrlVars, threadID int32) (rows *pgx.Rows, err error) {
@@ -412,11 +422,12 @@ func (instance *Post) GetPostDetails(id string, r string) (data map[string]inter
 		&instance.Author,
 		&instance.Message,
 		&instance.Thread,
-		&instance.Created,
 		&instance.Parent,
 		&instance.Forum,
 		&instance.IsEdited,
 	)
+
+	instance.Created = &timestamp
 
 	if err != nil {
 		return nil, PostNotFoundError
@@ -519,7 +530,6 @@ func (instance *Post) PostUpdate(id string) (err error) {
 			&instance.Author,
 			&instance.Message,
 			&instance.Thread,
-			&instance.Created,
 			&instance.Parent,
 			&instance.Forum,
 			&instance.IsEdited,
@@ -535,12 +545,13 @@ func (instance *Post) PostUpdate(id string) (err error) {
 			&instance.Author,
 			&instance.Message,
 			&instance.Thread,
-			&instance.Created,
 			&instance.Parent,
 			&instance.Forum,
 			&instance.IsEdited,
 		)
 	}
+
+	instance.Created = &timestamp
 
 	return
 }

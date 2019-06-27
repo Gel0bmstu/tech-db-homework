@@ -32,6 +32,7 @@ func ThreadsSlugOrIdPosts(c *gin.Context) {
 	var (
 		p  models.Posts
 		uv models.UrlVars
+		// posts *models.Posts
 	)
 
 	slugOrID := c.Param("slugOrID")
@@ -47,16 +48,16 @@ func ThreadsSlugOrIdPosts(c *gin.Context) {
 		uv.Desc = "DESC"
 	}
 
-	err := p.GetPosts(slugOrID, uv)
+	posts, err := p.GetPosts(slugOrID, uv)
 
-	if p == nil {
-		votar := models.Posts{}
-		p = votar
+	if posts == nil {
+		votar := []*models.Post{}
+		posts = &votar
 	}
 
 	switch err {
 	case nil:
-		sendData(c, 200, p)
+		sendData(c, 200, posts)
 	case models.ThreadNotFoundError:
 		sendError(c, 404, err.Error())
 	default:

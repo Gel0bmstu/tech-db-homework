@@ -1,11 +1,14 @@
 package database
 
 import (
+	"fmt"
+
 	"github.com/jackc/pgx"
 )
 
 var (
-	DB *pgx.ConnPool
+	DB        *pgx.ConnPool
+	Timestamp = "2006-01-02T18:04:05.01+03:00"
 )
 
 func ResetDB() (err error) {
@@ -106,15 +109,18 @@ func ResetDB() (err error) {
 		CREATE INDEX IF NOT EXISTS idxPostPath 
 			ON posts ((path[1]), path);
 
-		
 		CREATE INDEX IF NOT EXISTS idxPostThreadPath
 			ON posts (thread, path);
 
-<<<<<<< HEAD
-=======
-		-- sdfasdfs
+		CREATE INDEX IF NOT EXISTS idxPostThreadPathParent 
+			ON posts (thread, path, id);
+			
+		CREATE INDEX IF NOT EXISTS idxPostId 
+			ON posts (id);
 
->>>>>>> b318dd26b27c65aa2b2545eb297072764bb5f7fc
+		-- try
+
+
 		-- ---------------------------------------------------------------------
 		-- HELP FUNCTIONS:
 
@@ -221,8 +227,8 @@ func ResetDB() (err error) {
 			ON posts
 			FOR EACH ROW EXECUTE PROCEDURE changePath();
 	`
-	// fmt.Println(sql)
-	_, err = DB.Exec(sql)
+	fmt.Println(sql)
+	// _, err = DB.Exec(sql)
 
 	return
 }

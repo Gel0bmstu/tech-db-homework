@@ -21,7 +21,7 @@ RUN echo "shared_buffers = 256MB" >> /etc/postgresql/$PGVER/main/postgresql.conf
 # доступной памяти для дискового кеширования.
 # На основе того, доступна память или нет,планировщик будет делать выбор между 
 # использованием индексов и использованием сканирования таблицы. (75% от всей оперативной памяти)
-RUN echo "effective_cache_size = 1GB" >> /etc/postgresql/$PGVER/main/postgresql.conf
+RUN echo "effective_cache_size = 500MB" >> /etc/postgresql/$PGVER/main/postgresql.conf
 
 # Чекпойнт — это набор операций, которые выполняет postgres для гарантии того,
 # что все изменения были записаны в файлы данных (следовательно при сбое, 

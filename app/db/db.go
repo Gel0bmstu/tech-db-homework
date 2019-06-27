@@ -1,8 +1,6 @@
 package database
 
 import (
-	"fmt"
-
 	"github.com/jackc/pgx"
 )
 
@@ -97,27 +95,20 @@ func ResetDB() (err error) {
 		CREATE INDEX IF NOT EXISTS idxThreadSlugId 
 			ON threads (slug, id);
 
+		CREATE INDEX IF NOT EXISTS idxThreadForumCreated
+			ON threads (forum, created);
+
 		-- posts:
 
-		CREATE INDEX IF NOT EXISTS idxPostId 
-			ON posts (id);
+		CREATE INDEX IF NOT EXISTS idxPostIdThread
+			ON posts (id, thread);
 
 		CREATE INDEX IF NOT EXISTS idxPostPath 
 			ON posts ((path[1]), path);
 
-		CREATE INDEX IF NOT EXISTS idxPostThreadIdPath
-			ON posts (thread, id, path);
 		
 		CREATE INDEX IF NOT EXISTS idxPostThreadPath
 			ON posts (thread, path);
-
-		-- sdfasdfs
-
-		CREATE INDEX IF NOT EXISTS idxPostThreadParentId
-			ON posts (path[1], id, parent)
-
-		CREATE INDEX IF NOT EXISTS idxThreadAuthorForum
-			ON threads (author, forum);
 
 		-- ---------------------------------------------------------------------
 		-- HELP FUNCTIONS:
@@ -225,47 +216,8 @@ func ResetDB() (err error) {
 			ON posts
 			FOR EACH ROW EXECUTE PROCEDURE changePath();
 	`
-
-	// CREATE OR REPLACE FUNCTION postInsert() RETURNS TRIGGER AS $post_insert$
-	// BEGIN
-	// 	UPDATE forums
-	// 	SET posts = posts + 1
-	// 	WHERE slug = NEW.forum;
-	// 	RETURN NULL;
-	// END;
-	// $post_insert$ LANGUAGE plpgsql;
-
-	// CREATE TRIGGER postCreate
-	// AFTER INSERT
-	// ON posts
-	// FOR EACH ROW EXECUTE PROCEDURE postInsert();
-
-	// CREATE OR REPLACE FUNCTION postUpdate() RETURNS TRIGGER AS $post_update$
-	// BEGIN
-	// 	IF (NEW.message IS NOT NULL) AND (NEW.message <> OLD.message)
-	// 		THEN
-	// 			UPDATE posts
-	// 			SET isedited = true
-	// 			WHERE id = NEW.id;
-	// 		END IF;
-	// 	RETURN NEW;
-	// END;
-	// $post_update$ LANGUAGE plpgsql;
-
-	// DROP TRIGGER IF EXISTS postUpdate ON posts;
-
-	// CREATE TRIGGER postUpdate
-	// BEFORE UPDATE
-	// ON posts
-	// FOR EACH ROW EXECUTE PROCEDURE postUpdate();
-
-	// CREATE TRIGGER userForumInsert
-	// AFTER INSERT
-	// ON threads
-	// FOR EACH ROW EXECUTE PROCEDURE userForumInsert();
-
-	fmt.Println(sql)
-	// _, err = DB.Exec(sql)
+	// fmt.Println(sql)
+	_, err = DB.Exec(sql)
 
 	return
 }

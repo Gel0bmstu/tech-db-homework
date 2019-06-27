@@ -156,12 +156,6 @@ func (instance *Posts) CreatePost(soi string) (err error) {
 		userForumInsertValues...,
 	)
 
-	if err != nil {
-		fmt.Println("VOT TEBE!")
-		transactionUserFroum.Rollback()
-		return
-	}
-
 	transactionUserFroum.Commit()
 
 	// Заполняем посты недостающими значениями

@@ -113,12 +113,6 @@ func ResetDB() (err error) {
 
 		-- sdfasdfs
 
-		CREATE INDEX IF NOT EXISTS idxPostThreadParentId
-			ON posts (path[1], id, parent)
-
-		CREATE INDEX IF NOT EXISTS idxThreadAuthorForum
-			ON threads (author, forum);
-
 		-- ---------------------------------------------------------------------
 		-- HELP FUNCTIONS:
 

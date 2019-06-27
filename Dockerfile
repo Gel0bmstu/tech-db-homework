@@ -21,7 +21,7 @@ RUN echo "shared_buffers = 256MB" >> /etc/postgresql/$PGVER/main/postgresql.conf
 # доступной памяти для дискового кеширования.
 # На основе того, доступна память или нет,планировщик будет делать выбор между 
 # использованием индексов и использованием сканирования таблицы. (75% от всей оперативной памяти)
-RUN echo "effective_cache_size = 1GB" >> /etc/postgresql/$PGVER/main/postgresql.conf
+RUN echo "effective_cache_size = 768MB" >> /etc/postgresql/$PGVER/main/postgresql.conf
 
 # Чекпойнт — это набор операций, которые выполняет postgres для гарантии того,
 # что все изменения были записаны в файлы данных (следовательно при сбое, 
@@ -44,9 +44,8 @@ RUN echo "wal_buffers = 1MB" >> /etc/postgresql/$PGVER/main/postgresql.conf
 RUN echo "synchronous_commit = off" >> /etc/postgresql/$PGVER/main/postgresql.conf
 RUN echo "fsync = off" >> /etc/postgresql/$PGVER/main/postgresql.conf
 RUN echo "full_page_writes = off" >> /etc/postgresql/$PGVER/main/postgresql.conf
-RUN echo "maintenance_work_mem = 320MB" >> /etc/postgresql/$PGVER/main/postgresql.conf
+RUN echo "maintenance_work_mem = 128MB" >> /etc/postgresql/$PGVER/main/postgresql.conf
 RUN echo "log_statement = 'none'" >> /etc/postgresql/$PGVER/main/postgresql.conf
-RUN echo "logging_collector = off" >> /etc/postgresql/$PGVER/main/postgresql.conf
 
 # Остальное под железо машины
 RUN echo "max_connections = 200" >> /etc/postgresql/$PGVER/main/postgresql.conf
@@ -60,8 +59,8 @@ RUN echo "max_wal_size = 2GB" >> /etc/postgresql/$PGVER/main/postgresql.conf
 RUN echo "max_worker_processes = 8" >> /etc/postgresql/$PGVER/main/postgresql.conf
 RUN echo "max_parallel_workers_per_gather = 4" >> /etc/postgresql/$PGVER/main/postgresql.conf
 RUN echo "max_parallel_workers = 4" >> /etc/postgresql/$PGVER/main/postgresql.conf
-RUN echo "parallel_leader_participation = on" >> /etc/postgresql/$PGVER/main/postgresql.conf
 RUN echo "unix_socket_directories = '/var/run/postgresql'" >> /etc/postgresql/$PGVER/main/postgresql.conf
+
 
 EXPOSE 5432
 

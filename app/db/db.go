@@ -71,6 +71,9 @@ func ResetDB() (err error) {
 		CREATE UNLOGGED TABLE "user_forum" (
 			"nickname" citext COLLATE ucs_basic REFERENCES users(nickname),
 			"forum" citext REFERENCES forums(slug),
+			"fullname" text NOT NULL,
+			"about" text,
+			"email" citext,
 			CONSTRAINT user_forum_const UNIQUE ("nickname", "forum")
 		);
 
@@ -120,9 +123,9 @@ func ResetDB() (err error) {
 				SET threads = threads + 1
 				WHERE slug = NEW.forum;
 
-				INSERT INTO user_forum (nickname, forum)
-				VALUES (NEW.Author, NEW.Forum)
-				ON CONFLICT DO NOTHING;
+				-- INSERT INTO user_forum (nickname, forum)
+				-- VALUES (NEW.Author, NEW.Forum)
+				-- ON CONFLICT DO NOTHING;
 				RETURN NULL;
 			END;
 		$thread_insert$ LANGUAGE plpgsql;

@@ -34,10 +34,14 @@ func (instance *Posts) CreatePost(soi string) (err error) {
 
 		queryPosts     string
 		queryUserForum string
+		qPosts         string
+		qUserForum     string
 
 		postsInsertValues     []interface{}
 		userForumInsertValues []interface{}
 		postCount             int
+
+		u User
 	)
 
 	val, parseErr := strconv.Atoi(soi)
@@ -77,8 +81,8 @@ func (instance *Posts) CreatePost(soi string) (err error) {
 				  VALUES`
 
 	queryUserForum = `INSERT INTO user_forum
-					 (nickname, forum)
-					 VALUES`
+					  (nickname, fullname, about, email, forum)
+					  VALUES`
 
 	for i, _ := range *instance {
 
@@ -87,11 +91,14 @@ func (instance *Posts) CreatePost(soi string) (err error) {
 		(*instance)[i].Created = &database.Timestamp
 		if (*instance)[i].Author != "" {
 			err = database.DB.QueryRow(
-				slc.CheckUserNicknameByNickname,
+				slc.GetUserByNickname,
 
 				(*instance)[i].Author,
 			).Scan(
-				&(*instance)[i].Author,
+				&u.Nickname,
+				&u.Fullname,
+				&u.About,
+				&u.Email,
 			)
 
 			if err != nil {
@@ -115,9 +122,9 @@ func (instance *Posts) CreatePost(soi string) (err error) {
 		}
 
 		postsInsertValues = append(postsInsertValues, (*instance)[i].Author, (*instance)[i].Message, (*instance)[i].Parent, (*instance)[i].Thread, (*instance)[i].Forum)
-		userForumInsertValues = append(userForumInsertValues, (*instance)[i].Author, (*instance)[i].Forum)
+		userForumInsertValues = append(userForumInsertValues, u.Nickname, u.Fullname, u.About, u.Email, (*instance)[i].Forum)
 
-		qPosts := fmt.Sprintf(
+		qPosts = fmt.Sprintf(
 			"($%d, $%d, $%d, $%d, $%d)",
 
 			i*5+1,
@@ -127,12 +134,17 @@ func (instance *Posts) CreatePost(soi string) (err error) {
 			i*5+5,
 		)
 
-		qUserForum := fmt.Sprintf(
-			"($%d, $%d)",
+		qUserForum = qPosts
 
-			i*2+1,
-			i*2+2,
-		)
+		// qUserForum = fmt.Sprintf(
+		// 	"($%d, $%d, $%d, $%d, $%d)",
+
+		// 	i*2+1,
+		// 	i*2+2,
+		// 	i*5+3,
+		// 	i*5+4,
+		// 	i*5+5,
+		// )
 
 		queryPosts += qPosts
 		queryUserForum += qUserForum

@@ -23,13 +23,18 @@ type Threads []Thread
 
 func (instance *Thread) CreateThread() (err error) {
 
+	var u User
+
 	// Проверяем наличие автора и форума
 	err = database.DB.QueryRow(
-		slc.CheckUserNicknameByNickname,
+		slc.GetUserByNickname,
 
 		instance.Author,
 	).Scan(
-		&instance.Author,
+		&u.Nickname,
+		&u.Fullname,
+		&u.About,
+		&u.Email,
 	)
 
 	if err != nil {
@@ -64,16 +69,19 @@ func (instance *Thread) CreateThread() (err error) {
 	)
 
 	// Пушим юзера в вспомогательную базу
-	// _, err = database.DB.Exec(
-	// 	slc.UserHelpTableInsert,
+	_, err = database.DB.Exec(
+		slc.UserHelpTableInsert,
 
-	// 	instance.Author,
-	// 	instance.Forum,
-	// )
+		u.Nickname,
+		u.Fullname,
+		u.About,
+		u.Email,
+		instance.Forum,
+	)
 
-	// if err != nil {
-	// 	panic(err)
-	// }
+	if err != nil {
+		panic(err)
+	}
 
 	if threadErr == nil {
 		return

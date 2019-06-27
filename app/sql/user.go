@@ -16,8 +16,8 @@ var (
 	CreateUser = `INSERT INTO users (nickname, fullname, about, email)
 				  VALUES ($1, $2, $3, $4);`
 
-	UserHelpTableInsert = `INSERT INTO user_forum (nickname, forum)
-						   VALUES ($1, $2)
+	UserHelpTableInsert = `INSERT INTO user_forum (nickname, fullname, about, email, forum)
+						   VALUES ($1, $2, $3, $4, $5)
 						   ON CONFLICT DO NOTHING;`
 
 	UpdateUser = `UPDATE users 
@@ -33,35 +33,59 @@ var (
 							 FROM users
 							 WHERE email = $1;`
 
-	GetForumUsersSinceDesc = `SELECT u.nickname, u.fullname, u.about, u.email
-							  FROM user_forum uf 
-							  JOIN users u ON (
-								  u.nickname = uf.nickname) 
-							  WHERE uf.forum = $1 AND u.nickname < $2
-							  ORDER BY u.nickname DESC 
+	// GetForumUsersSinceDesc = `SELECT u.nickname, u.fullname, u.about, u.email
+	// 						  FROM user_forum uf
+	// 						  JOIN users u ON (
+	// 							  u.nickname = uf.nickname)
+	// 						  WHERE uf.forum = $1 AND u.nickname < $2
+	// 						  ORDER BY u.nickname DESC
+	// 						  `
+
+	// GetForumUsersSince = `SELECT u.nickname, u.fullname, u.about, u.email
+	// 					  FROM user_forum uf
+	// 					  JOIN users u ON (
+	// 						  u.nickname = uf.nickname)
+	// 					  WHERE  uf.forum = $1 AND u.nickname > $2
+	// 					  ORDER BY u.nickname
+	// 					  `
+
+	// GetForumUsersDesc = `SELECT u.nickname, u.fullname, u.about, u.email
+	// 					 FROM user_forum uf
+	// 					 JOIN users u ON (
+	// 						 u.nickname = uf.nickname)
+	// 					 WHERE uf.forum = $1
+	// 					 ORDER BY u.nickname DESC
+	// 					 `
+
+	// GetForumUsers = `SELECT u.nickname, u.fullname, u.about, u.email
+	// 				 FROM user_forum uf
+	// 				 JOIN users u ON (
+	// 					 u.nickname = uf.nickname)
+	// 				 WHERE uf.forum = $1
+	// 				 ORDER BY u.nickname
+	// 				 `
+
+	GetForumUsersSinceDesc = `SELECT nickname, fullname, about, email
+							  FROM user_forum
+							  WHERE forum = $1 AND nickname < $2
+							  ORDER BY nickname DESC 
 							  `
 
-	GetForumUsersSince = `SELECT u.nickname, u.fullname, u.about, u.email
-						  FROM user_forum uf 
-						  JOIN users u ON (
-							  u.nickname = uf.nickname) 
-						  WHERE  uf.forum = $1 AND u.nickname > $2
-						  ORDER BY u.nickname
+	GetForumUsersSince = `SELECT nickname, fullname, about, email
+						  FROM user_forum
+						  WHERE  forum = $1 AND nickname > $2
+						  ORDER BY nickname
 						  `
 
-	GetForumUsersDesc = `SELECT u.nickname, u.fullname, u.about, u.email
-						 FROM user_forum uf 
-						 JOIN users u ON (
-							 u.nickname = uf.nickname) 
-						 WHERE uf.forum = $1
-						 ORDER BY u.nickname DESC 
+	GetForumUsersDesc = `SELECT nickname, fullname, about, email
+						 FROM user_forum
+						 WHERE forum = $1
+						 ORDER BY nickname DESC 
 						 `
 
-	GetForumUsers = `SELECT u.nickname, u.fullname, u.about, u.email
-					 FROM user_forum uf 
-					 JOIN users u ON (
-						 u.nickname = uf.nickname)
-					 WHERE uf.forum = $1
-					 ORDER BY u.nickname
+	GetForumUsers = `SELECT nickname, fullname, about, email
+					 FROM user_forum
+					 WHERE forum = $1
+					 ORDER BY nickname
 					 `
 )

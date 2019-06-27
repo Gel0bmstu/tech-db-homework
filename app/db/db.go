@@ -57,7 +57,8 @@ func ResetDB() (err error) {
 			"forum" citext REFERENCES forums(slug),
 			"thread" bigint REFERENCES threads(id),
 			-- "created" timestamp WITH TIME ZONE DEFAULT '1970-01-01T00:00:00.000Z',
-			"path" bigint[]
+			"path" bigint[],
+			"childs" bigint[]
 		);
 
 		CREATE UNLOGGED TABLE "votes" (
@@ -111,6 +112,10 @@ func ResetDB() (err error) {
 
 		CREATE INDEX IF NOT EXISTS idxPostThreadPath
 			ON posts (thread, path);
+
+		CREATE INDEX IF NOT EXISTS idxPostRootParentThreadId
+			ON posts(thread, id) 
+			WHERE parent = 0;
 
 		-- ---------------------------------------------------------------------
 		-- HELP FUNCTIONS:
@@ -169,6 +174,10 @@ func ResetDB() (err error) {
 						INTO prevPath;
 
 						NEW.path = NEW.path || prevPath || NEW.id;
+
+						UPDATE posts
+						SET childs = childs || NEW.id
+						WHERE id = NEW.parent;
 
 						-- UPDATE posts
 						-- SET path = path || prevPath || NEW.id;
